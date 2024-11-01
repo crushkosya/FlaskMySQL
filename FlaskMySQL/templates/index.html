@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+      <div class="container-fluid text-center">
+        <div class="row p-5">
+          <div class="col-1"></div>
+          <div class="col">
+            <h1>Users List</h1>
+            <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">First name</th>
+                  <th scope="col">Last name</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in data %}
+                    <tr>
+                    <th scope="row">{{item.id}}</th>
+                    <td>{{item.firstname}}</td>
+                    <td>{{item.lastname}}</td>
+                    <td>{{item.email}}</td>
+                    <td>{{item.address}}</td>
+                    <td>
+                        <a href="#" onclick="populateForm('{{ item.firstname }}', '{{ item.lastname }}', '{{ item.email }}', '{{ item.address }}', '{{ item.id }}')">Update</a>
+                        <form action="{{ url_for('delete_user', id=item.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                        </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          </div>
+          <div class="col-1"></div>
+        </div>
+        <div class="row p-2">
+          <div class="col-1"></div>
+          <div class="col">
+            <h1>Sign Up Form</h1>
+            <form action="" method="POST" id="userForm">
+                <input type="hidden" id="userId" value="">
+              <hr>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="inputFname">First name</label>
+                  <input type="text" class="form-control" id="inputFname" placeholder="First name">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputLname">Last name</label>
+                  <input type="text" class="form-control" id="inputLname" placeholder="Last name">
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-group col">
+                  <label for="inputEmail4">Email</label>
+                  <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="inputPassword">Password</label>
+                  <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputConfirmPassword">Confirm Password</label>
+                  <input type="password" class="form-control" id="inputConfirmPassword" placeholder="Confirm Password">
+                </div>
+              </div>
+              <hr>
+              <div class="form-group">
+                <label for="inputAddress">Address</label>
+                <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+              </div>
+              <button type="submit" class="btn btn-primary" id="bot">Sign in</button>
+            </form>
+          </div>
+          <div class="col-1"></div>
+        </div>
+      </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script>
+        document.querySelector("#userForm").addEventListener("submit", async function (event) {
+            event.preventDefault(); 
+        
+            const userId = document.getElementById("userId").value;
+            const data = {
+                firstName: document.getElementById("inputFname").value,
+                lastName: document.getElementById("inputLname").value,
+                email: document.getElementById("inputEmail4").value,
+                password: document.getElementById("inputPassword").value,
+                confirmPassword: document.getElementById("inputConfirmPassword").value,
+                address: document.getElementById("inputAddress").value,
+            };
+        
+            if (data.password !== data.confirmPassword) {
+                alert("Passwords do not match");
+                return;
+            }
+        
+            const url = userId ? `http://127.0.0.1:5000/update_user/${userId}` : "http://127.0.0.1:5000/insert";
+            
+            try {
+                const response = await fetch(url, {
+                    method: userId ? "PUT" : "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+        
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.msg);
+                    console.log(result);
+                    location.reload();
+                } else {
+                    alert("Failed to submit form.");
+                    console.error("Error:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Network error:", error);
+            }
+        });
+        
+        function populateForm(firstName, lastName, email, address, userId) {
+            document.getElementById("inputFname").value = firstName;
+            document.getElementById("inputLname").value = lastName;
+            document.getElementById("inputEmail4").value = email;
+            document.getElementById("inputAddress").value = address;
+            document.getElementById("userId").value = userId;
+            document.getElementById("userForm").action = "/update_user/" + userId;
+            document.getElementById("bot").innerText="Update";
+        }
+    </script>    
+  </body>
+</html>
