@@ -1,3 +1,6 @@
+#Library used for database connection
+#pip install-mysql-connector-python
+
 from flask import Flask, redirect, url_for, render_template, request, g
 import mysql.connector
 from mysql.connector import Error
@@ -59,7 +62,7 @@ def insert():
             return response, 200
     
     response = {
-            'error' : 'Invalid'
+            'error' : 'Internal Server Error'
         }
     return response, 400
 
@@ -83,7 +86,7 @@ def update_user(id):
             }
             return response, 200
     response = {
-            'msg' : 'Internal Server Error'
+            'error' : 'Internal Server Error'
         }
     return response, 500
 
